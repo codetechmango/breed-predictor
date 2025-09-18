@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/supabase_service.dart';
-import '../services/ml_api_service.dart';
+import '../services/mock_breed_classifier_service.dart';
 import '../utils/app_localizations.dart';
 import 'prediction_result_screen.dart';
 import 'auth_screen.dart';
@@ -18,11 +18,28 @@ class _HomeScreenState extends State<HomeScreen> {
   String _currentLanguage = 'English';
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
+  bool _isModelInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
+    _initializeModel();
+  }
+
+  Future<void> _initializeModel() async {
+    final initialized = await MockBreedClassifierService.initialize();
+    setState(() {
+      _isModelInitialized = initialized;
+    });
+    if (!initialized) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to initialize AI model. Some features may not work.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
   }
 
   Future<void> _loadUserProfile() async {
@@ -78,58 +95,87 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
+    if (!_isModelInitialized) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('AI model is not ready. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     // Show loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(_translate('loading')),
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2E7D32)),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Analyzing image...',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[700],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'This may take a few seconds',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+              ),
+            ),
           ],
         ),
       ),
     );
 
     try {
-      // Try to upload image to Supabase Storage, fallback to local path
-      String imageUrl = _selectedImage!.path;
-      try {
-        final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}.jpg';
-        imageUrl = await SupabaseService.uploadImage(_selectedImage!.path, fileName);
-        print('Image uploaded successfully');
-      } catch (e) {
-        print('Image upload failed, using local path: $e');
-        imageUrl = 'local://${_selectedImage!.path}';
-      }
-
-      // Get prediction from ML API
-      final prediction = await MLApiService.predictBreed(_selectedImage!.path);
+      // Get prediction from mock AI model (simulates TensorFlow Lite)
+      final prediction = await MockBreedClassifierService.predictFromFile(_selectedImage!);
 
       if (mounted) {
         Navigator.of(context).pop(); // Close loading dialog
 
-        if (prediction['success'] == true) {
+        if (prediction != null) {
+          // Try to upload image to Supabase Storage for history (optional)
+          String imageUrl = _selectedImage!.path;
+          try {
+            final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+            imageUrl = await SupabaseService.uploadImage(_selectedImage!.path, fileName);
+            print('Image uploaded successfully');
+          } catch (e) {
+            print('Image upload failed, using local path: $e');
+            imageUrl = 'local://${_selectedImage!.path}';
+          }
+
           // Navigate to result screen
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => PredictionResultScreen(
                 imagePath: _selectedImage!.path,
                 imageUrl: imageUrl,
-                breed: prediction['breed'],
-                confidence: prediction['confidence'],
+                breed: prediction.breedName,
+                confidence: prediction.confidence,
                 language: _currentLanguage,
+                predictionResult: prediction,
               ),
             ),
           );
         } else {
           // Show error
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(prediction['error'] ?? 'Prediction failed'),
+            const SnackBar(
+              content: Text('Failed to analyze the image. Please try with a clearer photo.'),
               backgroundColor: Colors.red,
             ),
           );
@@ -140,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.of(context).pop(); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('Analysis failed: ${e.toString().split(':').last.trim()}'),
             backgroundColor: Colors.red,
           ),
         );

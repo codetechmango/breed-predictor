@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import '../models/prediction_result.dart';
 import '../services/supabase_service.dart';
 import '../services/voice_service.dart';
 import '../utils/app_localizations.dart';
@@ -11,6 +12,7 @@ class PredictionResultScreen extends StatefulWidget {
   final String breed;
   final double confidence;
   final String language;
+  final PredictionResult? predictionResult; // Add support for detailed results
 
   const PredictionResultScreen({
     super.key,
@@ -19,6 +21,7 @@ class PredictionResultScreen extends StatefulWidget {
     required this.breed,
     required this.confidence,
     required this.language,
+    this.predictionResult,
   });
 
   @override
@@ -274,6 +277,102 @@ class _PredictionResultScreenState extends State<PredictionResultScreen> {
                 ),
               ),
             ),
+            
+            // Top Predictions Section (if available)
+            if (widget.predictionResult?.allPredictions != null) ...[
+              const SizedBox(height: 20),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.leaderboard,
+                            color: Colors.orange[700],
+                            size: 28,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Top Predictions',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      ...widget.predictionResult!.allPredictions!.entries.map((entry) {
+                        final isTop = entry.key == widget.breed;
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isTop 
+                                ? Theme.of(context).primaryColor.withOpacity(0.1)
+                                : Colors.grey[50],
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isTop 
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.grey[300]!,
+                              width: isTop ? 2 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              if (isTop)
+                                Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Icon(
+                                    Icons.star,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                ),
+                              if (isTop) const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  entry.key.split(' ').map((word) => 
+                                    word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() : ''
+                                  ).join(' '),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: isTop ? FontWeight.bold : FontWeight.w500,
+                                    color: isTop ? Theme.of(context).primaryColor : Colors.black87,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                '${(entry.value * 100).toStringAsFixed(1)}%',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: entry.value > 0.8 
+                                      ? Colors.green 
+                                      : entry.value > 0.6 
+                                          ? Colors.orange 
+                                          : Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             
             const SizedBox(height: 30),
             
