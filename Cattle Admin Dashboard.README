@@ -1,0 +1,55 @@
+# 🐄 Cattle Admin Dashboard  
+
+A simple **Admin Dashboard** built using **HTML, CSS, and JavaScript** to manage user logins and feedback.  
+This is a static prototype designed to simulate how an admin can log in, view user activities, and manage app feedback.  
+
+---
+
+## ✨ Features  
+
+- **Admin Login System**  
+  - Secure login form with username & password (default: `admin/admin123`).  
+  - Neon-themed UI for the login screen.  
+
+- **Dashboard Tabs**  
+  - 👥 **Logins** – View user login details (User ID, Name, Time, Device).  
+  - 📝 **Feedback Received** – View and manage pending feedback with actions:  
+    - ✅ Mark Fixed  
+    - ⏳ Waitlist  
+  - ✅ **Feedback Fixed** – View feedback already resolved.  
+
+- **UI/UX Highlights**  
+  - Dark mode with animated gradient backgrounds.  
+  - Glassmorphism-style cards with neon effects.  
+  - Smooth animations on buttons and inputs.  
+  - Responsive layout for desktop.  
+
+---
+
+## 🚀 Tech Stack  
+
+- **Frontend:** HTML5, CSS3, JavaScript (Vanilla)  
+- **Design:** Glassmorphism + Neon Glow Effects  
+- **No external frameworks or libraries** (lightweight project).  
+
+---
+
+## 📸 Screenshots  
+
+### 🔐 Admin Login  
+![Login](./screenshots/login.jpeg)  
+
+### 📊 Dashboard – Feedback Received  
+![Feedback](./screenshots/feedback.jpeg)  
+
+### ✅ Dashboard – Feedback Fixed  
+![Fixed](./screenshots/fixed.jpeg)  
+
+---
+
+## ⚡ Usage  
+
+1. Clone the repository:  
+   ```bash
+   git clone https://github.com/your-username/cattle-admin-dashboard.git
+   cd cattle-admin-dashboard
