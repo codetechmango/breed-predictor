@@ -1,7 +1,7 @@
 class AppLocalizations {
   static const Map<String, Map<String, String>> _localizedValues = {
     'English': {
-      'app_title': 'Breed Prediction',
+      'app_title': 'Pet Breed Predictor',
       'login': 'Login',
       'signup': 'Sign Up',
       'email': 'Email',
@@ -27,7 +27,7 @@ class AppLocalizations {
       'success': 'Success',
     },
     'Hindi': {
-      'app_title': 'नस्ल पूर्वानुमान',
+      'app_title': 'Pet Breed Predictor',
       'login': 'लॉगिन',
       'signup': 'साइन अप',
       'email': 'ईमेल',
@@ -53,7 +53,7 @@ class AppLocalizations {
       'success': 'सफलता',
     },
     'Tamil': {
-      'app_title': 'இன கணிப்பு',
+      'app_title': 'Pet Breed Predictor',
       'login': 'உள்நுழைய',
       'signup': 'பதிவு செய்ய',
       'email': 'மின்னஞ்சல்',
@@ -79,7 +79,7 @@ class AppLocalizations {
       'success': 'வெற்றி',
     },
     'Telugu': {
-      'app_title': 'జాతి అంచనా',
+      'app_title': 'Pet Breed Predictor',
       'login': 'లాగిన్',
       'signup': 'సైన్ అప్',
       'email': 'ఇమెయిల్',
@@ -105,7 +105,7 @@ class AppLocalizations {
       'success': 'విజయం',
     },
     'Marathi': {
-      'app_title': 'जातीचा अंदाज',
+      'app_title': 'Pet Breed Predictor',
       'login': 'लॉगिन',
       'signup': 'साइन अप',
       'email': 'ईमेल',
